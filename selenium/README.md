@@ -2,7 +2,7 @@
 
 Python 2 and 3
 
-Requires selenium and pyvirtualdisplay
+Requires selenium, pyvirtualdisplay and FireFox
 
 Very Basic Boilerplate that I use for building scripts that headlessly download files using selenium and FireFox.
 

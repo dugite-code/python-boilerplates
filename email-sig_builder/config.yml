@@ -1,0 +1,11 @@
+Logging:
+    #CRITICAL, ERROR, WARNING, INFO, DEBUG
+    Level: DEBUG
+    Enabled: True
+    Logfile: signatures.log
+
+Templates Directory: Templates
+Output Directory: Output
+
+Users:
+  Dugite-Code: Tinkerer/Doodler

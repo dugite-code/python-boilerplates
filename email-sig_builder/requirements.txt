@@ -1,0 +1,3 @@
+pyyaml
+mako
+beautifulsoup4

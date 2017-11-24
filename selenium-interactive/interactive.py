@@ -25,6 +25,7 @@ def pagedump( cfg, filename ):
 		dumpfile = open( dumppath,'w',encoding='utf-8' )
 		dumpfile.write( driver.page_source )
 		dumpfile.close()
+		print( "Saved to " + dumpfolder )
 	return
 
 def waitforid( waitelement, waittime=30 ):

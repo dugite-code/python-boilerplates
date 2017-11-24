@@ -1,0 +1,13 @@
+## All files are relative to Project root
+Logging:
+    Page Dump: True
+Folders:
+  Download: downloads
+  Profile: Profile
+  Page Dump: Pages
+Binary:
+  In project root: True
+  Geckodriver: geckodriver.exe
+MIME:
+  CSV File: application.csv
+  Column name: Template

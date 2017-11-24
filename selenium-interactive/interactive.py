@@ -16,7 +16,12 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 def pagedump( cfg, filename ):
 	if cfg['Logging']['Page Dump']:
-		dumppath = os.path.join( root, cfg['Folders']['Page Dump'], filename )
+		dumpfolder = os.path.join( root, cfg['Folders']['Page Dump'] )
+
+		if not os.path.exists(dumpfolder):
+			os.makedirs(dumpfolder)
+
+		dumppath = os.path.join( dumpfolder, filename )
 		dumpfile = open( dumppath,'w',encoding='utf-8' )
 		dumpfile.write( driver.page_source )
 		dumpfile.close()
@@ -40,7 +45,15 @@ with open( config_file, 'r' ) as ymlfile:
 	cfg = yaml.safe_load( ymlfile )
 
 dwnld = os.path.join( root, cfg['Folders']['Download'] )
+
+if not os.path.exists(dwnld):
+	os.makedirs(dwnld)
+
 pfile = os.path.join( root, cfg['Folders']['Profile'] )
+
+if not os.path.exists(pfile):
+	print("Warning Firefox profile Missing")
+	exit()
 
 if cfg['Binary']['In project root']:
 	gecko = os.path.join( root, 'bin', cfg['Binary']['Geckodriver'] )
@@ -54,11 +67,11 @@ columns = defaultdict(list) # each value in each column is appended to a list
 csvfile = os.path.join( root, cfg['MIME']['CSV File'] )
 
 with open(csvfile) as f:
-    reader = csv.DictReader(f) # read rows into a dictionary format
-    for row in reader: # read a row as {column1: value1, column2: value2,...}
-        for (k,v) in row.items(): # go over each column name and value
-            columns[k].append(v) # append the value into the appropriate list
-                                 # based on column name k
+	reader = csv.DictReader(f) # read rows into a dictionary format
+	for row in reader: # read a row as {column1: value1, column2: value2,...}
+		for (k,v) in row.items(): # go over each column name and value
+			columns[k].append(v) # append the value into the appropriate list
+								 # based on column name k
 
 mimelist=";".join(columns[ cfg['MIME']['Column name'] ])
 print(mimelist)

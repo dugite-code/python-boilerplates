@@ -1,3 +1,15 @@
 Url: https://domain.tld
 Username: Example
 Password: Example_password
+
+Folders:
+  Download: downloads
+  Profile: profile
+
+Binary:
+  In project root: True
+  Geckodriver: geckodriver.exe
+
+MIME:
+  CSV File: application.csv
+  Column name: Template

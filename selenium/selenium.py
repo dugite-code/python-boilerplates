@@ -13,112 +13,135 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.webdriver import FirefoxProfile
 
 def what_hppend(StopNo):
-    ts = datetime.datetime.now().isoformat()
-    print ( ts, "Critical Fail: Refer to debug screenshot screen" + StopNo + ".png" )
-    driver.save_screenshot( './screen' + StopNo + ".png" )
-    driver.quit()
-    display.stop()
-    exit()
+	ts = datetime.datetime.now().isoformat()
+	print ( ts, "Critical Fail: Refer to debug screenshot screen" + StopNo + ".png" )
+	driver.save_screenshot( './screen' + StopNo + ".png" )
+	driver.quit()
+	display.stop()
+	exit()
 
 def waitforid( waitelement ):
-    element = WebDriverWait( driver, 20 ).until(
-    EC.presence_of_element_located( ( By.ID, waitelement ) )
-    )
-    return
+	element = WebDriverWait( driver, 20 ).until(
+	EC.presence_of_element_located( ( By.ID, waitelement ) )
+	)
+	return
 
 def waitforxpath( waitelement ):
-    element = WebDriverWait( driver, 200 ).until(
-    EC.presence_of_element_located( ( By.XPATH, waitelement ) )
-    )
-    return
+	element = WebDriverWait( driver, 200 ).until(
+	EC.presence_of_element_located( ( By.XPATH, waitelement ) )
+	)
+	return
 
 def main():
-    # Fetch root directory
-    root = os.path.dirname(os.path.realpath(__file__))
+	# Fetch root directory
+	root = os.path.dirname(os.path.realpath(__file__))
 
-    # Load the configuration yaml file
-    with open( os.path.join( root, "config.yml" ), 'r' ) as ymlfile:
-        cfg = yaml.safe_load( ymlfile )
+	# Load the configuration yaml file
+	with open( os.path.join( root, "config.yml" ), 'r' ) as ymlfile:
+		cfg = yaml.safe_load( ymlfile )
 
-    # Set system paths
-    dwnld = os.path.join( root, "downloads" ) # Download folder
-    pfile = os.path.join( root, "profile" ) # Firefox profile folder
+	# Set system paths
+	if cfg['Binary']['In project root']:
+		gecko = os.path.join( root, cfg['Binary']['Geckodriver'] )
+	else:
+		gecko = os.path.realpath( cfg['Binary']['Geckodriver'] )
 
-    # Start the pyvirtualdisplay
-    display = Display( visible=0, size=( 800, 600 ) )
-    display.start()
+	dwnld = os.path.join( root, "downloads" ) # Download folder
 
-    try:
-        # Browser Profile
-        fp = webdriver.FirefoxProfile(pfile)
-        fp.set_preference( "browser.download.folderList", 2 )
-        fp.set_preference( "browser.download.manager.showWhenStarting", False )
-        fp.set_preference( "browser.download.dir", dwnld )
-        fp.set_preference( "browser.helperApps.neverAsk.saveToDisk", "text/csv" ) #Set firefox to never ask when downloading csv files
-        driver = webdriver.Firefox( firefox_profile=fp )
-        driver.set_window_size( 1024, 768 )
-        driver.implicitly_wait( 120 ) # Measured in seconds
-        actions = webdriver.ActionChains( driver )
+    if not os.path.exists(dwnld):
+    	os.makedirs(dwnld)
 
-    except:
-        print("Critical Fail: Failed to load webbrowser")
-        what_hppend("0")
+	pfile = os.path.join( root, "profile" ) # Firefox profile folder
 
-    # Attempt to load url
-    try:
-        driver.get( cfg['Url'] ) # Open main webpage
+	# Start the pyvirtualdisplay
+	display = Display( visible=0, size=( 800, 600 ) )
+	display.start()
 
-    except:
+	# MIME List from: https://www.iana.org/assignments/media-types/media-types.xml
+	# Code from: https://stackoverflow.com/a/16503661
+	columns = defaultdict(list) # each value in each column is appended to a list
+	csvfile = os.path.join( root, cfg['MIME']['CSV File'] )
 
-        try:
-            ts = datetime.datetime.now().isoformat()
-            print ( ts, "Log: Re-attempting load Main Page" )
-            driver.refresh() # Re-fresh webpage
+	with open(csvfile) as f:
+		reader = csv.DictReader(f) # read rows into a dictionary format
+		for row in reader: # read a row as {column1: value1, column2: value2,...}
+			for (k,v) in row.items(): # go over each column name and value
+				columns[k].append(v) # append the value into the appropriate list
+									 # based on column name k
 
-        except:
-            ts = datetime.datetime.now().isoformat()
-            print ( ts, "Critical Fail: Failed to load Main Page" )
-            what_hppend( "1" )
+	mimelist=";".join(columns[ cfg['MIME']['Column name'] ])
 
-    # iframe password selection example.
-    try:
-        driver.switch_to.frame( "login" ) # Switch to the Login iframe
+	try:
+		# Browser Profile
+		fp = webdriver.FirefoxProfile(pfile)
+		fp.set_preference( "browser.download.folderList", 2 )
+		fp.set_preference( "browser.download.manager.showWhenStarting", False )
+		fp.set_preference( "browser.download.dir", dwnld )
+		fp.set_preference( "browser.helperApps.neverAsk.saveToDisk", mimelist ) #Set firefox to never ask when downloading csv files
+		driver = webdriver.Firefox( executable_path=gecko, firefox_profile=fp )
+		driver.set_window_size( 1024, 768 )
+		driver.implicitly_wait( 120 ) # Measured in seconds
+		actions = webdriver.ActionChains( driver )
 
-        driver.find_element_by_id( "username" ).send_keys( cfg['Username'] ) # Enter username
-        driver.find_element_by_id( "password" ).send_keys( cfg['Password'] ) # Enter password
-        driver.find_element_by_name( "password" ).send_keys( Keys.RETURN ) # Press the RETURN key
+	except:
+		print("Critical Fail: Failed to load webbrowser")
+		what_hppend("0")
 
-    except:
-        ts = datetime.datetime.now().isoformat()
-        print ( ts, "Critical Fail: Failed to enter username and password" )
-        what_hppend( "2" )
+	# Attempt to load url
+	try:
+		driver.get( cfg['Url'] ) # Open main webpage
 
-    # Wait for element with id PageHead to be loaded
-    try:
-        waitforid( "PageHead" )
+	except:
 
-    except:
+		try:
+			ts = datetime.datetime.now().isoformat()
+			print ( ts, "Log: Re-attempting load Main Page" )
+			driver.refresh() # Re-fresh webpage
 
-        try:
-            ts = datetime.datetime.now().isoformat()
-            print ( ts, "Log: Re-attempting to load First Page" )
-            driver.refresh() # Re-fresh webpage
-            waitforid( "mastHead" )
+		except:
+			ts = datetime.datetime.now().isoformat()
+			print ( ts, "Critical Fail: Failed to load Main Page" )
+			what_hppend( "1" )
 
-        except:
-            ts = datetime.datetime.now().isoformat()
-            print ( ts, "Critical Fail: Failed to load First Page" )
-            what_hppend( "3" )
+	# iframe password selection example.
+	try:
+		driver.switch_to.frame( "login" ) # Switch to the Login iframe
 
-    # Click a download button
-    try:
-    	driver.find_element_by_xpath("//select[@class='button']/option[text()='Download']").click()
-        time.sleep(10)
+		driver.find_element_by_id( "username" ).send_keys( cfg['Username'] ) # Enter username
+		driver.find_element_by_id( "password" ).send_keys( cfg['Password'] ) # Enter password
+		driver.find_element_by_name( "password" ).send_keys( Keys.RETURN ) # Press the RETURN key
 
-    except:
-        ts = datetime.datetime.now().isoformat()
-        print ( ts, "Critical Fail: Failed to click Download Button" )
-        what_hppend( "4" )
+	except:
+		ts = datetime.datetime.now().isoformat()
+		print ( ts, "Critical Fail: Failed to enter username and password" )
+		what_hppend( "2" )
+
+	# Wait for element with id PageHead to be loaded
+	try:
+		waitforid( "PageHead" )
+
+	except:
+
+		try:
+			ts = datetime.datetime.now().isoformat()
+			print ( ts, "Log: Re-attempting to load First Page" )
+			driver.refresh() # Re-fresh webpage
+			waitforid( "mastHead" )
+
+		except:
+			ts = datetime.datetime.now().isoformat()
+			print ( ts, "Critical Fail: Failed to load First Page" )
+			what_hppend( "3" )
+
+	# Click a download button
+	try:
+		driver.find_element_by_xpath("//select[@class='button']/option[text()='Download']").click()
+		time.sleep(10)
+
+	except:
+		ts = datetime.datetime.now().isoformat()
+		print ( ts, "Critical Fail: Failed to click Download Button" )
+		what_hppend( "4" )
 
 if __name__ == '__main__':
-    main()
+	main()

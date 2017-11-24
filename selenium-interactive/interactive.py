@@ -56,7 +56,7 @@ if not os.path.exists(pfile):
 	exit()
 
 if cfg['Binary']['In project root']:
-	gecko = os.path.join( root, 'bin', cfg['Binary']['Geckodriver'] )
+	gecko = os.path.join( root, cfg['Binary']['Geckodriver'] )
 else:
 	gecko = os.path.realpath( cfg['Binary']['Geckodriver'] )
 

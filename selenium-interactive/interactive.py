@@ -74,7 +74,6 @@ with open(csvfile) as f:
 								 # based on column name k
 
 mimelist=";".join(columns[ cfg['MIME']['Column name'] ])
-print(mimelist)
 
 fp = webdriver.FirefoxProfile( pfile )
 fp.set_preference( "browser.download.folderList", 2 )

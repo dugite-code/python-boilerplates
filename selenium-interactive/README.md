@@ -1,6 +1,7 @@
 # Selenium Interactive
 
 Python 3
+Requires firefox, [geckodriver](https://github.com/mozilla/geckodriver/releases) and selenium
 
 ```
 python -i interactive.py

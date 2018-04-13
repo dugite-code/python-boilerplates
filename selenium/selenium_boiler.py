@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
 	# Create a logging format
 	formatter = logging.Formatter( '%(asctime)s %(levelname)s: %(message)s' )
-	print(config)
+
 	# Add the handlers to the logger
 	if config['Logging Settings']['Log to File']:
 		logfile_handler = logging.FileHandler( log_file )

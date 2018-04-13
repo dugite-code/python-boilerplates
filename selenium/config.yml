@@ -12,6 +12,7 @@ Logging Settings:
   Logfile: selenium_boiler.log
 
 Virtual Display: False
+Close Browser: True
 
 Folders:
   Download Folder: downloads

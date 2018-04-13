@@ -10,6 +10,7 @@ import argparse
 import logging
 import yaml
 import os
+import traceback
 
 import csv
 from collections import defaultdict
@@ -105,7 +106,8 @@ if __name__ == '__main__':
 						'Log to File' : False,
 						'Logfile' : 'selenium_boiler.log'
 						},
-					'Virtual Display' : False}
+					'Virtual Display' : False,
+					'Close Browser' : True}
 
 	# Load the configuration yaml file
 	with open( args.config_file, 'r' ) as ymlfile:
@@ -195,7 +197,6 @@ if __name__ == '__main__':
 
 	except Exception as e:
 		logger.error( 'Critical Fail: ' + str( e ) )
-	finally:
 		driver.quit()
 		if config['Virtual Display']:
 			display.stop()
@@ -209,6 +210,7 @@ if __name__ == '__main__':
 			logger.error( 'Unable to produce Screenshot: ' + str( e2 ) )
 		logger.error( 'Critical Fail: ' + str( e ) )
 
-	driver.quit()
+	if config['Close Browser']:
+		driver.quit()
 	if config['Virtual Display']:
 		display.stop()

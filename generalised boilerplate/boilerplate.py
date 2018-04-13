@@ -22,6 +22,22 @@ def sanitize( data ):
 		return [ v for v in ( sanitize(v) for v in data ) if v ]
 	return { k: v for k, v in ( (k, sanitize( v ) ) for k, v in data.items() ) if v is not None }
 
+# From https://stackoverflow.com/a/7205672
+def mergedicts(dict1, dict2):
+    for k in set(dict1.keys()).union(dict2.keys()):
+        if k in dict1 and k in dict2:
+            if isinstance(dict1[k], dict) and isinstance(dict2[k], dict):
+                yield (k, dict(mergedicts(dict1[k], dict2[k])))
+            else:
+                # If one of the values is not a dict, you can't continue merging it.
+                # Value from second dict overrides one in first and we move on.
+                yield (k, dict2[k])
+                # Alternatively, replace this with exception raiser to alert you of value conflicts
+        elif k in dict1:
+            yield (k, dict1[k])
+        else:
+            yield (k, dict2[k])
+
 if __name__ == '__main__':
 	# Fetch root directory
 	root = os.path.dirname (os.path.realpath( __file__ ) )
@@ -64,10 +80,7 @@ if __name__ == '__main__':
 
 	cfg_user = sanitize( cfg_file )
 
-	# Modified from: https://stackoverflow.com/a/29241297
-	config = { k: dict( cfg_default.get( k, {} ), **cfg_user.get( k, {} ) )
-				for k in cfg_default.keys() | cfg_user.keys()
-			}
+	config = dict( mergedicts(cfg_default,cfg_user) )
 
 	del cfg_default
 	del cfg_user

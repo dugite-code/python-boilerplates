@@ -2,9 +2,20 @@ Url: https://google.com
 Username: Example
 Password: Example_password
 
+Logging Settings:
+  #Master switch
+  Enabled: True
+  #CRITICAL, ERROR, WARNING, INFO, DEBUG
+  Level: DEBUG
+  Log to Console: True
+  Log to File: True
+  Logfile: selenium_boiler.log
+
+Virtual Display: False
+
 Folders:
-  Download: downloads
-  Profile: profile
+  Download Folder: downloads
+  Profile Folder: profile
 
 Binary:
   In project root: True

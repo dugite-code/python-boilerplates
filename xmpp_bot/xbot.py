@@ -107,6 +107,18 @@ class testBot( ClientXMPP ):
 		ltimer_thread = threading.Thread(target=self.listen_timer, kwargs={ 'msg': msg })
 		ltimer_thread.start()
 
+	def opt_match( self, msg ):
+		message = msg['body'].replace(self.nick, "")
+		for key, opt in self.tasks.enabled_options().items():
+			if opt in message:
+				logger.info( 'Option Match: ' + opt )
+				action = getattr( self.tasks, key )
+				return_message = action( msg )
+				logger.debug( 'Return message: ' + return_message )
+				self.send_message( mto=msg['from'].bare,
+									mbody=return_message, mtype='groupchat' )
+		self.lextend = time.time()
+
 	def muc_message( self, msg ):
 		logger.debug( 'New Message: ' + msg['body'] )
 		if msg['mucnick'] != self.nick and self.listen == True and self.listento in msg['mucnick']:
@@ -114,19 +126,11 @@ class testBot( ClientXMPP ):
 				self.lextend = 0
 				self.stop_listening( msg )
 			else:
-				message = msg['body'].replace(self.nick, "")
-				for key, opt in self.tasks.enabled_options().items():
-					if opt in message:
-						logger.info( 'Option Match: ' + opt )
-						action = getattr( self.tasks, key )
-						return_message = action( msg )
-						logger.debug( 'Return message: ' + return_message )
-						self.send_message( mto=msg['from'].bare,
-											mbody=return_message, mtype='groupchat' )
-				self.lextend = time.time()
+				self.opt_match( msg )
 
 		elif msg['mucnick'] != self.nick and self.nick in msg['body'] and self.listen == False:
 			self.start_listening( msg )
+			self.opt_match( msg )
 
 	def muc_online( self, presence ):
 		if presence['muc']['nick'] != self.nick:
